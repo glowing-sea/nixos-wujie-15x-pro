@@ -1,0 +1,98 @@
+# Partition
+8M for grub boot
+
+# Channels
+sudo mousepad /etc/apt/sources.list
+Add <http://ftp.au.debian.org/debian> except security
+
+# Headers
+sudo apt install linux-headers-amd64
+
+# Grub to 1s
+sudo nano /etc/default/grub
+sudo update-grub
+
+# Fcitx
+im-config
+
+# Check Ollama
+curl http://192.168.122.1:11434/api/version
+
+
+<<<<<<<<<<<<<<<
+
+shinyuki@virtual-yuki:~$ sudo apt install linux-headers-amd64
+Installing:
+  linux-headers-amd64
+
+Installing dependencies:
+  linux-headers-6.12.74+deb13+1-amd64   linux-kbuild-6.12.74+deb13+1
+  linux-headers-6.12.74+deb13+1-common  pahole
+
+Summary:
+  Upgrading: 0, Installing: 5, Removing: 0, Not Upgrading: 0
+  Download size: 15.9 MB
+  Space needed: 77.4 MB / 90.0 GB available
+
+Continue? [Y/n]
+
+>>>>>>>>>>>>>>>
+
+
+# Update Kernel
+sudo apt install -t trixie-backports linux-image-amd64 linux-headers-amd64
+
+
+<<<<<<<<<<<<<<<<
+
+shinyuki@virtual-yuki:~$ sudo apt install -t trixie-backports linux-image-amd64 linux-headers-amd64
+Upgrading:
+  linux-headers-amd64  linux-image-amd64  linux-libc-dev
+
+Installing dependencies:
+  cpp-14-for-host                  linux-headers-6.19.6+deb13-amd64
+  gcc-14-for-host                  linux-headers-6.19.6+deb13-common
+  linux-base-6.19.6+deb13-amd64    linux-image-6.19.6+deb13-amd64
+  linux-base-amd64                 linux-kbuild-6.19.6+deb13
+  linux-binary-6.19.6+deb13-amd64  linux-modules-6.19.6+deb13-amd64
+
+Suggested packages:
+  debian-kernel-handbook  linux-doc-6.19
+
+Summary:
+  Upgrading: 3, Installing: 10, Removing: 0, Not Upgrading: 203
+  Download size: 187 MB
+  Space needed: 403 MB / 89.9 GB available
+
+Continue? [Y/n]
+
+>>>>>>>>>>>>>>>>
+
+sudo apt install fastfetch
+
+
+<<<<<<<<<<<<<<<<
+
+shinyuki@virtual-yuki:~$ sudo apt install fastfetch
+The following packages were automatically installed and are no longer required:
+  linux-headers-6.12.74+deb13+1-amd64   linux-image-6.12.74+deb13+1-amd64
+  linux-headers-6.12.74+deb13+1-common  linux-kbuild-6.12.74+deb13+1
+Use 'sudo apt autoremove' to remove them.
+
+Installing:
+  fastfetch
+
+Installing dependencies:
+  libyyjson0
+
+Summary:
+  Upgrading: 0, Installing: 2, Removing: 0, Not Upgrading: 0
+  Download size: 632 kB
+  Space needed: 2,083 kB / 89.5 GB available
+
+Continue? [Y/n]
+
+
+>>>>>>>>>>>>>>>>
+
+

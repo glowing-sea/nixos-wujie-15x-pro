@@ -1,38 +1,43 @@
-# Edit this configuration file to define what should be installed on
-# your system. Help is available in the configuration.nix(5) man page, on
-# https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
-
-{ config, lib, pkgs, ... }:
+{ config, pkgs, unstable, ... }:
 {
   imports = [ ./hardware-configuration.nix ];
 
 
   # Kernel
-  # boot.kernelPackages = pkgs.linuxPackages_6_18;
   boot.kernelPackages = pkgs.linuxPackages_latest;
-  # boot.kernelPackages = pkgs.linuxPackages;
 
 
   # Boot
   boot.loader.timeout = 1;
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
+  boot.resumeDevice = "/dev/disk/by-uuid/52683222-d6e4-4f88-a4dc-f361710279f5";
+  boot.kernelParams = [
+    "resume_offset=18419909"
+  ];
 
 
   # Swap
-  # In your configuration.nix or hardware-configuration.nix
   swapDevices = [
-    {
-      device = "/swap/swapfile";
-      # Since it's already created, NixOS will just use it.
-      # If it wasn't there, NixOS could create it if you added 'size = 16384;'
-    }
+    # If it is there, NixOS will just use it.
+    # If it wasn't there, NixOS could create it if 'size = 16384;' is added.
+    {device = "/swap/swapfile";}
   ];
+
+
+  # GPU
+  hardware.graphics = {
+    enable = true;  # Should be enabled implicitly by DE
+    enable32Bit = true;
+  };
+  # Ensure the GPU memory is mapped and ready before any services (into RAM disk)
+  hardware.amdgpu.initrd.enable = true;
 
 
   # Network
   networking.hostName = "chiyuki-nanami";
   networking.networkmanager.enable = true;
+  hardware.bluetooth.enable = true;
   services.openssh = {
     enable = true;
     # Ensure the SFTP subsystem is explicitly enabled
@@ -46,38 +51,31 @@
   };
 
 
-  # Bluetooth
-  hardware.bluetooth.enable = true;
-  # services.blueman.enable = true;
+  # Firewall
+  networking.nftables.enable = true;
+  networking.firewall = {
+    enable = true;
+    trustedInterfaces = [ "tailscale0" "virbr0" ];
+    allowedUDPPorts = [ config.services.tailscale.port ]; # tailscale
+    allowedTCPPorts = [ 1234 ]; # nc
+  };
 
 
-  # VPN (!! Enable Later)
-#   services.tailscale.enable = true;
-#   # 2. Force tailscaled to use nftables (Critical for clean nftables-only systems)
-#   # This avoids the "iptables-compat" translation layer issues.
-#   systemd.services.tailscaled = {
-#     serviceConfig.Environment = [ "TS_DEBUG_FIREWALL_MODE=nftables" ];
-#     # Ensure it starts after the network is up but doesn't block boot
-#     # after = [ "network-pre.target" ];
-#     # wants = [ "network-pre.target" ];
-#   };
-#   # 3. Optimization: Prevent systemd from waiting for network online
-#   # (Optional but recommended for faster boot with VPNs)
-#   systemd.network.wait-online.enable = false;
-#   boot.initrd.systemd.network.wait-online.enable = false;
-
-
-  # Firewall (!!!! Enable Later)
-#   networking.nftables.enable = true;
-#   networking.firewall = {
-#     enable = true;
-#     # checkReversePath = "loose"; # Default None
-#     # Always allow traffic from your Tailscale network
-#     trustedInterfaces = [ "tailscale0" "virbr0"  ];
-#     # Allow the Tailscale UDP port through the firewall
-#     allowedUDPPorts = [ config.services.tailscale.port ];
-#     allowedTCPPorts = [ 1234 ]; # Append port to the port list
-#   };
+  # VPN
+  services.tailscale.enable = true;
+  # Force tailscaled to use nftables (Critical for clean nftables-only systems)
+  # This avoids the "iptables-compat" translation layer issues.
+  systemd.services.tailscaled = {
+    serviceConfig.Environment = [ "TS_DEBUG_FIREWALL_MODE=nftables" ];
+  };
+  # Optimization: Prevent systemd from waiting for network online
+  # Optional but recommended for faster boot with VPNs
+  systemd.network.wait-online.enable = false;
+  boot.initrd.systemd.network.wait-online.enable = false;
+  # [!! Added Elsewhere]: networking.nftables.enable = true;
+  # [!! Added Elsewhere]: networking.firewall.enable = true;
+  # [!! Added Elsewhere]: networking.firewall.trustedInterfaces = [ "tailscale0" ];
+  # [!! Added Elsewhere]: networking.firewall.allowedUDPPorts = [ config.services.tailscale.port ];
 
 
   # Audio & Printing
@@ -92,7 +90,7 @@
   };
   
 
-  # DE
+  # Desktop Environment
   services.xserver.enable = true;
   services.displayManager = {
     sddm.enable = true;
@@ -107,131 +105,61 @@
   services.xserver.xkb = { layout = "au"; variant = ""; }; # keymap in x11  
 
 
-  # Default APP (!!! Was Diable by Eiri-Coffee)
-#   xdg.mime.defaultApplications = {
-#     "text/html" = "firefox.desktop";
-#     "x-scheme-handler/http" = "firefox.desktop";
-#     "x-scheme-handler/https" = "firefox.desktop";
-#   };
-
-
-#   # Hyperland (!!! Enable Later)
-#   # services.getty.autologinUser = "chiyuki";
-#   programs.hyprland = {
-#     enable = true;
-#     # withUWSM = true; # systemd wrapper of wayland
-#     xwayland.enable = true;
-#   };
-
-
-  # Nix Lid (!!! Disabled by Eifi-Coffee)
-#   programs.nix-ld.enable = true;
-#   # Optional: add libraries that the vscode server usually needs
-#   programs.nix-ld.libraries = with pkgs; [
-#     stdenv.cc.cc
-#     zlib
-#     fuse3
-#     icu
-#     nss
-#     openssl
-#     curl
-#     expat
-#   ];
-
-
-  # Steam (Enable Later !!!!)
-#   # Allow unfree packages
-#   nixpkgs.config.allowUnfree = true;
-#   programs.steam = {
-#     enable = true;
-#     remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
-#     dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server
-#     localNetworkGameTransfers.openFirewall = true; # Open ports in the firewall for Steam Local Network
-#   };
-
-
   # Essential System Tools
   services.flatpak.enable = true;
   programs.firefox.enable = true;
   environment.systemPackages = with pkgs; [
-    # kdePackages.sddm-kcm
-#     nil
-#     neovim
-#     wget
-#     pciutils
-     fastfetch
-#     python3
-#     black
-#     ffmpeg
-#     nvtopPackages.full # GPU monitor
-#     nvitop # Python-based GPU monitor (great for ML)
-#     kdiskmark
-#     kdePackages.partitionmanager
-#     hunspell
-#     hunspellDicts.en_US
-#     hunspellDicts.en_AU
+    nil
+    neovim
+    wget
+    pciutils
+    fastfetch
+    black  # Python Formatter
+    vlc
+    ffmpeg
+    nvtopPackages.amd  # Task Monitor
+    qdiskinfo
+    kdiskmark
+    hunspell  # Spelling Check
+    hunspellDicts.en_US
+    hunspellDicts.en_AU
+    libreoffice-qt-fresh
+    python3
 
+    # C
+    cmake
+    ninja
+    llvmPackages.clang  # Provides 'clang' and 'clang++'
+    llvmPackages.bintools  # Provides 'ld' (the linker)
+    clang-tools # Provides 'clangd' (LSP) and 'clang-format'
 
-#     # Hyprland
-#
-#     # --- Terminals ---
-#     kitty             # Primary (Nvidia/GPU accelerated)
-#     foot              # Secondary (CPU-based / Wayland native backup)
-#
-#     # --- Desktop Essentials ---
-#     waybar            # The top bar
-#     rofi      # App launcher (Wayland fork)
-#     swww              # Wallpaper daemon (smooth transitions)
-#     # hyprpaper # simple wallpaper
-#
-#     # --- Notifications (Choose ONE, Dunst is easier for beginners) ---
-#     dunst             # Notification daemon
-#     libnotify         # Provides 'notify-send' command
-#     # mako # notification
-#
-#     # --- Utils ---
-#     grim              # Screenshot (take image)
-#     slurp             # Screenshot (select region)
-#     wl-clipboard      # Clipboard (copy/paste support)
-#     pavucontrol       # Audio GUI (essential for Pipewire)
+    # KDE
+    kdePackages.kate  # (Implicitly Enabled)
+    kdePackages.elisa  # (Implicitly Enabled)
+    kdePackages.sddm-kcm  # SDDM Configuration (View Only)
+    kdePackages.partitionmanager
+    kdePackages.kcalc
+    kdePackages.kclock
+    kdePackages.kolourpaint
+    kdePackages.kmines
+    kdePackages.krecorder
+    kdePackages.dragon
   ];
 
 
-
-# ===================== Virtual Machine (Enable Later !!!!) ===============
-
-# Enable the libvirtd daemon
-# virtualisation.libvirtd.enable = true;
-
-# Install the Virt-Manager GUI
-# programs.virt-manager.enable = true;
-
-# Enabled by default when using Gnome and Plasma
-# programs.dconf.enable = true;
-
-# Added Elsewhere: networking.firewall.trustedInterfaces = [ "virbr0" ];
-# Added Elsewhere: users.users.chiyuki.extraGroups = [ "libvirtd" "kvm" ];
+  # Default APP
+  xdg.mime.defaultApplications = {
+    "text/html" = "firefox.desktop";
+    "x-scheme-handler/http" = "firefox.desktop";
+    "x-scheme-handler/https" = "firefox.desktop";
+  };
 
 
-# ================= Deprecated Settings (Enable Later !!!!) ==============
-
-# Virtual Network
-# virsh net-start default
-# virsh net-autostart default
-
-# Ensure your user is in the correct group
-# users.groups.libvirtd.members = ["chiyuki"];
-# Required for Virt-Manager to save settings
-# programs.dconf.enable = true;
-# Ensure your user is in the correct group
-# # Wiki Setup
-# virtualisation.libvirtd.enable = true;
-# programs.virt-manager.enable = true;
-# users.groups.libvirtd.members = ["your_username"];
-# virtualisation.spiceUSBRedirection.enable = true;
-
-# ==============================
-
+  # Virtual Machine
+  virtualisation.libvirtd.enable = true;  # libvirtd daemon
+  programs.virt-manager.enable = true;  # Virt-Manager GUI
+  # [!! Added Elsewhere]: networking.firewall.trustedInterfaces = [ "virbr0" ];
+  # [!! Added Elsewhere]: users.users.chiyuki.extraGroups = [ "libvirtd" "kvm" ];
 
 
   # User
@@ -244,11 +172,8 @@
       "wheel"
       # "video" # give user direct access to video hardware devices or webcam
       # "render"
-      # "libvirtd" # for virtual machine
-      # "kvm" # virtual machine
-    ];
-    packages = with pkgs; [
-    #  Moved to home.nix
+      "libvirtd" # for virtual machine
+      "kvm" # virtual machine
     ];
   };
 
@@ -297,127 +222,31 @@
   };
 
 
+  # AI
+  services.ollama = {
+    enable = true;
+    package = unstable.ollama-rocm;
+    host = "0.0.0.0";
+    port = 11434;
+    environmentVariables = {
+      OLLAMA_KEEP_ALIVE = "1m";
+    };
+  };
+
+
   # Flake
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
   programs.direnv.enable = true;
-  # nix.registry.kt.to = { type = "path"; path = "/home/chiyuki/github/kt"; };
-
-
-  # ===================== AI =======================
-
-#   # AI
-#   # 1. Enable the Ollama service
-#   services.ollama = {
-#     enable = true;
-#
-#     # This automatically selects the version of Ollama built with CUDA support
-#     acceleration = "cuda";
-#
-#     # Optional: Open the firewall if you want to access Ollama from your Debian VM
-#     # (since we already added tailscale0 and virbr0 to trustedInterfaces,
-#     # this may not be strictly necessary, but it's good practice).
-#     # openFirewall = true;
-#   };
-
-  # ==========================================
-
-
-
-  # Configure network proxy if necessary
-  # networking.proxy.default = "http://user:password@proxy:port/";
-  # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
-
-  # Select internationalisation properties.
-  # console = {
-  #   font = "Lat2-Terminus16";
-  #   keyMap = "us";
-  #   useXkbConfig = true; # use xkb.options in tty.
-  # };
-
-  # Enable the X11 windowing system.
-  # services.xserver.enable = true;
-
-
+  nix.registry.kt.to = {
+    type = "path";
+    path = "/home/chiyuki/nixos-wujie-15x-pro/python-envs/kt";
+  };
+  nix.registry.base.to = {
+    type = "path";
+    path = "/home/chiyuki/nixos-wujie-15x-pro/python-envs/base";
+  };
   
 
-  # Configure keymap in X11
-  # services.xserver.xkb.layout = "us";
-  # services.xserver.xkb.options = "eurosign:e,caps:escape";
-
-  # Enable CUPS to print documents.
-  # services.printing.enable = true;
-
-  # Enable sound.
-  # services.pulseaudio.enable = true;
-  # OR
-  # services.pipewire = {
-  #   enable = true;
-  #   pulse.enable = true;
-  # };
-
-  # Enable touchpad support (enabled default in most desktopManager).
-  # services.libinput.enable = true;
-
-  # Define a user account. Don't forget to set a password with ‘passwd’.
-  # users.users.alice = {
-  #   isNormalUser = true;
-  #   extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
-  #   packages = with pkgs; [
-  #     tree
-  #   ];
-  # };
-
-  # programs.firefox.enable = true;
-
-  # List packages installed in system profile.
-  # You can use https://search.nixos.org/ to find more packages (and options).
-  # environment.systemPackages = with pkgs; [
-  #   vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-  #   wget
-  # ];
-
-  # Some programs need SUID wrappers, can be configured further or are
-  # started in user sessions.
-  # programs.mtr.enable = true;
-  # programs.gnupg.agent = {
-  #   enable = true;
-  #   enableSSHSupport = true;
-  # };
-
-  # List services that you want to enable:
-
-  # Enable the OpenSSH daemon.
-  # services.openssh.enable = true;
-
-  # Open ports in the firewall.
-  # networking.firewall.allowedTCPPorts = [ ... ];
-  # networking.firewall.allowedUDPPorts = [ ... ];
-  # Or disable the firewall altogether.
-  # networking.firewall.enable = false;
-
-  # Copy the NixOS configuration file and link it from the resulting system
-  # (/run/current-system/configuration.nix). This is useful in case you
-  # accidentally delete configuration.nix.
-  # system.copySystemConfiguration = true;
-
-  # This option defines the first version of NixOS you have installed on this particular machine,
-  # and is used to maintain compatibility with application data (e.g. databases) created on older NixOS versions.
-  #
-  # Most users should NEVER change this value after the initial install, for any reason,
-  # even if you've upgraded your system to a new NixOS release.
-  #
-  # This value does NOT affect the Nixpkgs version your packages and OS are pulled from,
-  # so changing it will NOT upgrade your system - see https://nixos.org/manual/nixos/stable/#sec-upgrading for how
-  # to actually do that.
-  #
-  # This value being lower than the current NixOS release does NOT mean your system is
-  # out of date, out of support, or vulnerable.
-  #
-  # Do NOT change this value unless you have manually inspected all the changes it would make to your configuration,
-  # and migrated your data accordingly.
-  #
-  # For more information, see `man configuration.nix` or https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion .
-  
   system.stateVersion = "25.11"; # Did you read the comment?
 }
 

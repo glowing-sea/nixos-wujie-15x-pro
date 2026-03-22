@@ -1,0 +1,332 @@
+
+===============================
+
+flake.nix
+
+===============================
+
+
+nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+home-manager.url = "github:nix-community/home-manager/master";
+vscode-server.url = "github:nix-community/nixos-vscode-server";
+
+vscode-server.nixosModules.default (
+  { config, pkgs, ... }: {
+    services.vscode-server.enable = true;
+  }
+)
+
+===============================
+
+Home.nix
+
+===============================
+
+
+  # This is the "Tony-style" link to your dotfiles
+  # Anything you put in ~/nixos-config/config will appear in ~/.config
+  # This links ~/nixos-config/config/ to ~/.config/
+  # but does it safely by merging rather than replacing the whole folder
+  # home.file.".config" = {
+    # source = ./config;
+    # recursive = true;
+  # };
+
+
+
+  xdg.configFile = {
+    # "kdeglobals".source = createSimlink "kde/kdeglobals";
+    # "plasmarc".source = createSimlink "kde/plasmarc";
+    # "kglobalshortcutsrc".source = createSimlink "kde/kglobalshortcutsrc";
+    # "kwinrc".source = createSimlink "kde/kwinrc";
+
+    # You can add Konsole or other apps here too
+    # "konsole".source = createSimlink "konsole";
+  };
+
+
+
+  # VS Code Declarative User settings (ChatGPT)
+  #     profiles.default.userSettings = {
+#       "update.mode" = "none";
+#       "editor.fontSize" = 14;
+#       "workbench.colorTheme" = "Default Dark Modern";
+#
+#       # Important: Tell VS Code to use clangd instead of Microsoft's engine
+#       "C_Cpp.intelliSenseEngine" = "disabled";
+#
+#       # Since we removed Pylance, we use the standard Language Server
+#       "python.languageServer" = "Default";
+#     };
+
+
+# VS Code Declarative User settings
+#     profiles.default.userSettings = {
+#       "files.autoSave" = "afterDelay";
+#       "update.mode" = "none"; # Diable editor update
+#       "extensions.autoUpdate" = false; # no extention update
+#       "extensions.autoCheckUpdates" = false; # no extention update
+#       # "telemetry.telemetryLevel" = "off";
+#       # ... your other research settings
+#     };
+
+#   userSettings = {
+#     "editor.fontSize" = 14;
+#     "workbench.colorTheme" = "Default Dark Modern";
+#     "update.mode" = "none"; # Let Nix handle updates
+#     };
+
+
+
+===============================
+
+configuration.nix
+
+===============================
+
+Manuals
+nixos-help --man
+https://search.nixos.org/options
+Section 5 of man configuration.nix
+
+
+{ config, lib, pkgs, ... }:
+
+
+# Kernel
+boot.kernelPackages = pkgs.linuxPackages_6_18;
+boot.kernelPackages = pkgs.linuxPackages;
+
+
+# GPU
+services.xserver.videoDrivers = [ "amdgpu" ]; # Not necessary
+# load the amdgpu module in the initial ramdisk
+hardware.amdgpu.initrd.enable = true;
+boot.initrd.kernelModules = [ "amdgpu" ]; # same effect
+
+
+# Bluetooth
+services.blueman.enable = true; # No Need for KDE Plasma
+
+
+# VPN
+  systemd.services.tailscaled = {
+    # Ensure it starts after the network is up but doesn't block boot
+    after = [ "network-pre.target" ]; # Not in Wiki
+    wants = [ "network-pre.target" ]; # Not in Wiki
+  };
+
+
+# Firewall
+networking.firewall = {
+checkReversePath = "loose"; # Default None
+  trustedInterfaces = [ "virbr0"  ];
+};
+
+
+# Hyperland (!!! Enable Later)
+#   # services.getty.autologinUser = "chiyuki";
+#   programs.hyprland = {
+#     enable = true;
+#     # withUWSM = true; # systemd wrapper of wayland
+#     xwayland.enable = true;
+#   };
+
+
+# Hyprland Tools
+environment.systemPackages = with pkgs; [
+#     # Hyprland
+#
+#     # --- Terminals ---
+#     kitty             # Primary (Nvidia/GPU accelerated)
+#     foot              # Secondary (CPU-based / Wayland native backup)
+#
+#     # --- Desktop Essentials ---
+#     waybar            # The top bar
+#     rofi      # App launcher (Wayland fork)
+#     swww              # Wallpaper daemon (smooth transitions)
+#     # hyprpaper # simple wallpaper
+#
+#     # --- Notifications (Choose ONE, Dunst is easier for beginners) ---
+#     dunst             # Notification daemon
+#     libnotify         # Provides 'notify-send' command
+#     # mako # notification
+#
+#     # --- Utils ---
+#     grim              # Screenshot (take image)
+#     slurp             # Screenshot (select region)
+#     wl-clipboard      # Clipboard (copy/paste support)
+#     pavucontrol       # Audio GUI (essential for Pipewire)
+
+      unstable.xxxxxx
+];
+
+
+# Nix Lid (!!! Disabled by Eifi-Coffee)
+#   programs.nix-ld.enable = true;
+#   # Optional: add libraries that the vscode server usually needs
+#   programs.nix-ld.libraries = with pkgs; [
+#     stdenv.cc.cc
+#     zlib
+#     fuse3
+#     icu
+#     nss
+#     openssl
+#     curl
+#     expat
+#   ];
+
+
+# Steam (Enable Later !!!!)
+#   # Allow unfree packages
+#   nixpkgs.config.allowUnfree = true;
+#   programs.steam = {
+#     enable = true;
+#     remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
+#     dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server
+#     localNetworkGameTransfers.openFirewall = true; # Open ports in the firewall for Steam Local Network
+#   };
+
+
+# Virtual Machine
+programs.dconf.enable = true;  # Enabled by default when using Gnome and Plasma
+
+
+# Virtual Machine (Deprecated)
+# Virtual Network
+# virsh net-start default
+# virsh net-autostart default
+# Ensure your user is in the correct group
+# users.groups.libvirtd.members = ["chiyuki"];
+# Required for Virt-Manager to save settings
+# programs.dconf.enable = true;
+# Ensure your user is in the correct group
+# # Wiki Setup
+# virtualisation.libvirtd.enable = true;
+# programs.virt-manager.enable = true;
+# users.groups.libvirtd.members = ["your_username"];
+# virtualisation.spiceUSBRedirection.enable = true;
+
+
+# User
+  # User
+  users.users.chiyuki = {
+    packages = with pkgs; [
+    #  Moved to home.nix
+    ];
+  };
+
+
+# AI
+services.ollama = {
+    enable = true;
+    acceleration = "rocm";
+    openFirewall = true;
+    host = "0.0.0.0"; # Allow connections from your VM/Network
+  };
+
+
+
+
+===============================
+
+configuration.nix (Auto Gen)
+
+===============================
+
+
+
+  # Configure network proxy if necessary
+  # networking.proxy.default = "http://user:password@proxy:port/";
+  # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
+
+  # Select internationalisation properties.
+  # console = {
+  #   font = "Lat2-Terminus16";
+  #   keyMap = "us";
+  #   useXkbConfig = true; # use xkb.options in tty.
+  # };
+
+  # Enable the X11 windowing system.
+  # services.xserver.enable = true;
+
+
+
+
+  # Configure keymap in X11
+  # services.xserver.xkb.layout = "us";
+  # services.xserver.xkb.options = "eurosign:e,caps:escape";
+
+  # Enable CUPS to print documents.
+  # services.printing.enable = true;
+
+  # Enable sound.
+  # services.pulseaudio.enable = true;
+  # OR
+  # services.pipewire = {
+  #   enable = true;
+  #   pulse.enable = true;
+  # };
+
+  # Enable touchpad support (enabled default in most desktopManager).
+  # services.libinput.enable = true;
+
+  # Define a user account. Don't forget to set a password with ‘passwd’.
+  # users.users.alice = {
+  #   isNormalUser = true;
+  #   extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
+  #   packages = with pkgs; [
+  #     tree
+  #   ];
+  # };
+
+  # programs.firefox.enable = true;
+
+  # List packages installed in system profile.
+  # You can use https://search.nixos.org/ to find more packages (and options).
+  # environment.systemPackages = with pkgs; [
+  #   vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
+  #   wget
+  # ];
+
+  # Some programs need SUID wrappers, can be configured further or are
+  # started in user sessions.
+  # programs.mtr.enable = true;
+  # programs.gnupg.agent = {
+  #   enable = true;
+  #   enableSSHSupport = true;
+  # };
+
+  # List services that you want to enable:
+
+  # Enable the OpenSSH daemon.
+  # services.openssh.enable = true;
+
+  # Open ports in the firewall.
+  # networking.firewall.allowedTCPPorts = [ ... ];
+  # networking.firewall.allowedUDPPorts = [ ... ];
+  # Or disable the firewall altogether.
+  # networking.firewall.enable = false;
+
+  # Copy the NixOS configuration file and link it from the resulting system
+  # (/run/current-system/configuration.nix). This is useful in case you
+  # accidentally delete configuration.nix.
+  # system.copySystemConfiguration = true;
+
+  # This option defines the first version of NixOS you have installed on this particular machine,
+  # and is used to maintain compatibility with application data (e.g. databases) created on older NixOS versions.
+  #
+  # Most users should NEVER change this value after the initial install, for any reason,
+  # even if you've upgraded your system to a new NixOS release.
+  #
+  # This value does NOT affect the Nixpkgs version your packages and OS are pulled from,
+  # so changing it will NOT upgrade your system - see https://nixos.org/manual/nixos/stable/#sec-upgrading for how
+  # to actually do that.
+  #
+  # This value being lower than the current NixOS release does NOT mean your system is
+  # out of date, out of support, or vulnerable.
+  #
+  # Do NOT change this value unless you have manually inspected all the changes it would make to your configuration,
+  # and migrated your data accordingly.
+  #
+  # For more information, see `man configuration.nix` or https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion .

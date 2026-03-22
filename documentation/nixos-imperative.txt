@@ -1,0 +1,171 @@
+============ OS Install =============
+
+
+# Set Paddword
+passwd for nixos and root
+
+
+# WIFI
+nmtui
+
+
+# SSH
+ssh root@10.168.57.31
+
+
+# Check Disk ID
+lsblk
+nvme1n1     259:5    0 953.9G  0 disk
+├─nvme1n1p1 259:6    0     1G  0 part
+├─nvme1n1p2 259:7    0    16M  0 part
+├─nvme1n1p3 259:8    0     2G  0 part
+├─nvme1n1p4 259:9    0   800G  0 part
+└─nvme1n1p5 259:10   0 150.9G  0 part
+
+
+# Format
+mkfs.fat -F 32 -n BOOT /dev/nvme1n1p1
+mkfs.ext4 /dev/nvme1n1p3
+mkfs.btrfs -L NixOS /dev/nvme1n1p4 -f
+
+
+# Create subvolume
+mount /dev/nvme1n1p4 /mnt
+btrfs subvolume create /mnt/@
+btrfs subvolume create /mnt/@home
+btrfs subvolume create /mnt/@nix
+btrfs subvolume create /mnt/@log
+btrfs subvolume create /mnt/@swap
+umount /mnt
+
+
+# Mount root
+mount -o subvol=@,compress=zstd,noatime /dev/nvme1n1p4 /mnt
+mkdir -p /mnt/{boot,home,nix,var/log,swap}
+
+
+# Mount with optimisations
+mount /dev/nvme1n1p1 /mnt/boot
+mount -o subvol=@home,compress=zstd,noatime /dev/nvme1n1p4 /mnt/home
+mount -o subvol=@nix,compress=zstd,noatime,lazytime /dev/nvme1n1p4 /mnt/nix
+mount -o subvol=@log,compress=zstd,noatime /dev/nvme1n1p4 /mnt/var/log
+mount -o subvol=@swap,noatime /dev/nvme1n1p4 /mnt/swap
+
+
+# Swap File Setup
+truncate -s 0 /mnt/swap/swapfile
+chattr +C /mnt/swap/swapfile  # Disable CoW for swap
+btrfs property set /mnt/swap/swapfile compression ""
+dd if=/dev/zero of=/mnt/swap/swapfile bs=1M count=32768 status=progress # 32GB Swap
+chmod 600 /mnt/swap/swapfile
+mkswap /mnt/swap/swapfile
+swapon /mnt/swap/swapfile #temporary
+
+
+# Generate config
+nixos-generate-config --root /mnt
+
+
+# Create flake.nix
+cd /mnt/etc/nixos
+
+
+# Create and edit flake.nix
+nano flake.nix
+
+
+# Edit configuration.nix
+nano configuration.nix
+
+
+# Edit home.nix
+nano home.nix
+
+
+# Generate Flake Lock
+nix --extra-experimental-features "nix-command flakes" flake lock
+
+
+# Install nixos
+nixos-install --flake .#chiyuki-nanami
+(In case: rm -rf ~/.cache/nix)
+
+
+# Password
+nixos-enter --root /mnt -c 'passwd chiyuki'
+
+
+# Umount
+swapon --show
+swapoff /mnt/swap/swapfile
+umount /mnt/swap
+umount /mnt/var/log
+umount /mnt/nix
+umount /mnt/home
+umount /mnt/boot
+cd /
+umount /mnt
+reboot
+
+
+=========== Post Install (OneTime) ============
+
+
+# Setup Git Repo
+ssh-keygen -t ed25519 -C "seneiri@outlook.com"
+cat ~/.ssh/id_ed25519.pub
+
+
+# Move from /etc/nixos to ./nixos-config
+sudo cp -r /etc/nixos/* ~/nixos-configs/
+sudo chown -R $USER:users ~/nixos-configs/
+sudo nixos-rebuild switch --flake ~/nixos-config#eiri-coffee
+
+
+# Register Python Virtual Environment
+cd ~/nixos-config/python-envs/base
+direnv allow
+nix flake update
+nix develop
+
+
+# Commit
+cd ~/nixos-config
+git add .
+nix flake update
+nix-switch
+
+
+# Flatpak
+flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+flatpak update
+
+
+# KDE Extension
+Themal
+
+
+# Hibernate
+sudo btrfs inspect-internal map-swapfile /swap/swapfile
+boot.resumeDevice = "/dev/disk/by-uuid/52683222-d6e4-4f88-a4dc-f361710279f5";
+boot.kernelParams = [
+    "resume_offset=18419909"
+];
+
+
+# VPN
+tailscale login
+
+
+# Virtual Machine
+sudo virsh net-list --all
+sudo virsh net-start default / sudo virsh net-destroy default
+sudo virsh net-autostart default / sudo virsh net-autostart --disable default
+
+
+# AI
+ollama run qwen3.5
+
+
+# VS Code
+CSV by ReprEng
