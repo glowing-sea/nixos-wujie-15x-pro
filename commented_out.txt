@@ -211,6 +211,7 @@ programs.dconf.enable = true;  # Enabled by default when using Gnome and Plasma
 # User
   # User
   users.users.chiyuki = {
+    # hashedPasswordFile = "/home/chiyuki/nixos-config/secrets/chiyuki-password-hash";
     packages = with pkgs; [
     #  Moved to home.nix
     ];

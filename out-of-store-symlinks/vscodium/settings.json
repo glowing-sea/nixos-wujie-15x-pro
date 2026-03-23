@@ -1,5 +1,4 @@
 {
-    "files.autoSave": "afterDelay",
     "extensions.autoCheckUpdates": false,
     "extensions.autoUpdate": false,
     "update.mode": "none",
@@ -7,4 +6,5 @@
     "editor.wordWrapColumn": 88,
     "workbench.secondarySideBar.defaultVisibility": "hidden",
     "basedpyright.analysis.typeCheckingMode": "standard",
+    "files.autoSave": "afterDelay",
 }

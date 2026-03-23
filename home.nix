@@ -2,7 +2,7 @@
 
 let
   # Use your specific path
-  dotfiles = "/home/chiyuki/Desktop/nixos-wujie-15x-pro/out-of-store-symlinks";
+  dotfiles = "/home/chiyuki/nixos-wujie-15x-pro/out-of-store-symlinks/";
   createSimlink = path: config.lib.file.mkOutOfStoreSymlink "${dotfiles}/${path}";
 in
 
@@ -27,6 +27,7 @@ in
     obs-studio
     gimp
     upscayl
+    onlyoffice-desktopeditors
   ];
 
 
@@ -65,7 +66,6 @@ in
   };
 
 
-
   xdg.userDirs = {
     enable = true;
     createDirectories = true;
@@ -96,7 +96,6 @@ in
       python = "python3";
       activate-kt = "nix develop ~/nixos-config/python-envs/kt";
       activate-base = "nix develop ~/nixos-config/python-envs/base";
-      nvidia-run = "nvidia-offload";
       hypr = "start-hyprland";
     };
     bashrcExtra = ''

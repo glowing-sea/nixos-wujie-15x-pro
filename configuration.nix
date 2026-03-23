@@ -18,6 +18,7 @@
 
 
   # Swap
+  zramSwap.enable = true;
   swapDevices = [
     # If it is there, NixOS will just use it.
     # If it wasn't there, NixOS could create it if 'size = 16384;' is added.
@@ -166,7 +167,6 @@
   users.users.chiyuki = {
     isNormalUser = true;
     description = "chiyuki";
-    # hashedPasswordFile = "/home/chiyuki/nixos-config/secrets/chiyuki-password-hash";
     extraGroups = [ 
       "networkmanager" # Switch network without sudo
       "wheel"
@@ -218,6 +218,7 @@
       serif = [ "Noto Serif" "Noto Serif CJK SC" ];
       sansSerif = [ "Noto Sans" "Noto Sans CJK SC" ];
       monospace = [ "Noto Sans Mono" "Noto Sans Mono CJK SC" ];
+      emoji = [ "Noto Color Emoji" ];
     };
   };
 

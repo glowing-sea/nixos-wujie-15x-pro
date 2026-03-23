@@ -169,3 +169,29 @@ ollama run qwen3.5
 
 # VS Code
 CSV by ReprEng
+
+
+# Input Method Theme
+【初音】喵乐乐 into /home/chiyuki/.local/share/fcitx5/themes/
+
+
+# Font for OnlyOffice
+For each install font, run
+mkdir -p ~/.local/share/fonts
+nix-store --query --outputs $(nix-instantiate '<nixpkgs>' -A source-han-serif)
+
+# Noto Sans & Serif
+nix-store --query --outputs $(nix-instantiate '<nixpkgs>' -A noto-fonts)
+cp -r /nix/store/dg3hd9mqha517djbgpgnq8r4q1j1wn30-noto-fonts-2025.11.01/share/fonts/noto/* ~/.local/share/fonts/
+
+# CJK Fonts
+nix-store --query --outputs $(nix-instantiate '<nixpkgs>' -A noto-fonts-cjk-sans)
+nix-store --query --outputs $(nix-instantiate '<nixpkgs>' -A noto-fonts-cjk-serif)
+cp /nix/store/722ld9djs9awdc7x0m2ppar493ajz1b0-noto-fonts-cjk-sans-2.004/share/fonts/opentype/noto-cjk/* ~/.local/share/fonts/
+cp /nix/store/yrq7ir3xh6rbw1bvmn1jxkki77ynma6y-noto-fonts-cjk-serif-2.003/share/fonts/opentype/noto-cjk/* ~/.local/share/fonts/
+
+# Permission
+chmod 644 ~/.local/share/fonts/*
+fc-cache -fv
+
+
