@@ -141,10 +141,6 @@ flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flat
 flatpak update
 
 
-# KDE Extension
-Themal
-
-
 # Hibernate
 sudo btrfs inspect-internal map-swapfile /swap/swapfile
 boot.resumeDevice = "/dev/disk/by-uuid/52683222-d6e4-4f88-a4dc-f361710279f5";
@@ -171,8 +167,11 @@ ollama run qwen3.5
 CSV by ReprEng
 
 
-# Input Method Theme
+# KDE
 【初音】喵乐乐 into /home/chiyuki/.local/share/fcitx5/themes/
+Miku Cursor
+Themal Monitor
+
 
 
 # Font for OnlyOffice
@@ -194,4 +193,31 @@ cp /nix/store/yrq7ir3xh6rbw1bvmn1jxkki77ynma6y-noto-fonts-cjk-serif-2.003/share/
 chmod 644 ~/.local/share/fonts/*
 fc-cache -fv
 
+
+
+# Waydroid
+sudo waydroid init -s GAPPS
+
+Start the Waydroid LXC container
+$ sudo systemctl start waydroid-container
+
+You'll know it worked by checking the journal You should see "Started Waydroid Container".
+$ sudo journalctl -u waydroid-container -e
+
+Start Waydroid session
+You'll know it is finished when you see the message "Android with user 0 is ready".
+$ waydroid session start
+
+waydroid session start
+
+waydroid show-full-ui
+
+https://docs.waydro.id/faq/google-play-certification
+
+sudo waydroid shell -- sh -c "sqlite3 /data/data/*/*/gservices.db 'select * from main where name = \"android_id\";'"
+
+https://www.google.com/android/uncertified
+
+nix shell github:nix-community/NUR#repos.ataraxiasjel.waydroid-script -c sudo waydroid-script
+In the TUI, select Android 13 > Install > libhoudini
 

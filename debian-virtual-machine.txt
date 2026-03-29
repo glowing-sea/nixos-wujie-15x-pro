@@ -95,4 +95,65 @@ Continue? [Y/n]
 
 >>>>>>>>>>>>>>>>
 
+sudo apt install gvfs-backends gvfs-fuse
 
+
+<<<<<<<<<<<<<<<<<
+
+shinyuki@virtual-yuki:~$ sudo apt install gvfs-backends gvfs-fuse
+[sudo] password for shinyuki:
+The following package was automatically installed and is no longer required:
+  linux-image-6.12.73+deb13-amd64
+Use 'sudo apt autoremove' to remove it.
+
+Installing:
+  gvfs-backends  gvfs-fuse
+
+Installing dependencies:
+  libcdio-cdda2t64      libgdata22         libmsgraph-1-1  libmtp9t64
+  libcdio-paranoia2t64  libgoa-1.0-0b      libmtp-common   libnfs14
+  libgdata-common       libgoa-1.0-common  libmtp-runtime
+
+Suggested packages:
+  bluez-obexd  samba-common
+
+Recommended packages:
+  wsdd
+
+Summary:
+  Upgrading: 0, Installing: 13, Removing: 0, Not Upgrading: 0
+  Download size: 1,497 kB
+  Space needed: 7,340 kB / 89.4 GB available
+
+Continue? [Y/n]
+
+>>>>>>>>>>>>>>>>>>>
+
+
+sudo apt install openssh-server
+
+<<<<<<<<<<<<<<<<<<<<
+
+shinyuki@virtual-yuki:~$ sudo apt install openssh-server
+[sudo] password for shinyuki:
+The following package was automatically installed and is no longer required:
+  linux-image-6.12.73+deb13-amd64
+Use 'sudo apt autoremove' to remove it.
+
+Installing:
+  openssh-server
+
+Installing dependencies:
+  libwtmpdb0  ncurses-term  openssh-client  openssh-sftp-server  runit-helper
+
+Suggested packages:
+  keychain  libpam-ssh  monkeysphere  ssh-askpass  molly-guard  ufw
+
+Summary:
+  Upgrading: 0, Installing: 6, Removing: 0, Not Upgrading: 0
+  Download size: 2,191 kB
+  Space needed: 13.4 MB / 89.4 GB available
+
+Continue? [Y/n]
+
+>>>>>>>>>>>>>>>>>>>>>>

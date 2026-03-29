@@ -35,6 +35,10 @@
   hardware.amdgpu.initrd.enable = true;
 
 
+  # Games (Permissions for the hardware)
+  hardware.steam-hardware.enable = true;
+
+
   # Network
   networking.hostName = "chiyuki-nanami";
   networking.networkmanager.enable = true;
@@ -79,6 +83,14 @@
   # [!! Added Elsewhere]: networking.firewall.allowedUDPPorts = [ config.services.tailscale.port ];
 
 
+  # GNUPG# Enable the GnuPG agent with support for a GUI pinentry
+  programs.gnupg.agent = {
+    enable = true;
+    enableSSHSupport = true;
+    pinentryPackage = pkgs.pinentry-qt; # Provides a native dialog box.
+  };
+
+
   # Audio & Printing
   services.printing.enable = true;
   services.pulseaudio.enable = false;
@@ -111,6 +123,7 @@
   programs.firefox.enable = true;
   environment.systemPackages = with pkgs; [
     nil
+    lsd
     neovim
     wget
     pciutils
@@ -126,6 +139,7 @@
     hunspellDicts.en_AU
     libreoffice-qt-fresh
     python3
+    cryptsetup
 
     # C
     cmake
@@ -161,6 +175,7 @@
   programs.virt-manager.enable = true;  # Virt-Manager GUI
   # [!! Added Elsewhere]: networking.firewall.trustedInterfaces = [ "virbr0" ];
   # [!! Added Elsewhere]: users.users.chiyuki.extraGroups = [ "libvirtd" "kvm" ];
+  virtualisation.waydroid.enable = true;
 
 
   # User
@@ -210,6 +225,7 @@
     noto-fonts-cjk-serif
     source-han-sans
     source-han-serif
+    nerd-fonts.jetbrains-mono
   ];
   fonts.fontconfig = {
     enable = true;

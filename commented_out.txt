@@ -16,11 +16,23 @@ vscode-server.nixosModules.default (
   }
 )
 
+
+Use of "home-manager.useGlobalPkgs = true;" and "home-manager.useUserPackages = true;"
+
+-> Prevent Home Manager from Downloading its own version of nixpkgs.
+
+
+Use of "..."
+
+-> I only care about self, nixpkgs, and home-manager, but feel free to pass in whatever else you have.
+
+
 ===============================
 
 Home.nix
 
 ===============================
+
 
 
   # This is the "Tony-style" link to your dotfiles
@@ -84,6 +96,8 @@ configuration.nix
 
 ===============================
 
+
+
 Manuals
 nixos-help --man
 https://search.nixos.org/options
@@ -96,6 +110,12 @@ Section 5 of man configuration.nix
 # Kernel
 boot.kernelPackages = pkgs.linuxPackages_6_18;
 boot.kernelPackages = pkgs.linuxPackages;
+
+
+
+
+  # Ability to create virtual "translated" controllers
+  # hardware.uinput.enable = true;
 
 
 # GPU
@@ -227,6 +247,13 @@ services.ollama = {
   };
 
 
+# Themes
+    kdePackages.qtstyleplugin-kvantum
+    whitesur-kde
+    whitesur-cursors
+    whitesur-icon-theme
+    # plasma-overdose-kde-theme
+  ];
 
 
 ===============================
