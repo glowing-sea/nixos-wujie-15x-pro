@@ -31,9 +31,9 @@ in
   ];
 
 
-  programs.vscode = {
+  programs.vscodium = {
     enable = true;
-    package = pkgs.vscodium; # The open-source version
+    # package = pkgs.vscodium; # The open-source version
 
     profiles.default.extensions = with pkgs.vscode-extensions; [
       # Python (The core extension is OSS, but we skip Pylance)
@@ -69,6 +69,7 @@ in
   xdg.userDirs = {
     enable = true;
     createDirectories = true;
+    setSessionVariables = false; # Adopts 26.05 defaults explicitly
   };
 
 
